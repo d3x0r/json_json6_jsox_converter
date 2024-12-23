@@ -1,0 +1,121 @@
+
+
+<html>
+<head>
+<link rel="stylesheet" href="./dark-styles.css" >
+<style>
+.text-input{
+	width: 33vw;
+	height:60vh;
+}
+
+.to-group,.from-group {
+	border:2px inset #333;
+	border-top:none;
+	display:inline-block;
+}
+
+.group-label {
+	position:relative;
+	top:-0.5em;
+}
+</style>
+</head>
+<body>
+</body>
+
+<script src="json6.js"></script>
+
+<script type="module">
+
+import {JSOX} from "./jsox.min.mjs.gz"
+import {Popup,popups} from "./popups.mjs"
+
+class ConvertForm extends Popup{
+	
+	fromJSON = true;
+	fromJSON6 = false;
+	fromJSOX = false;
+	toJSON = false;
+	toJSON6 = false;
+	toJSOX = true;
+	format = "\\t";
+	
+	
+
+	constructor( parent ) {
+		super( "JSON/JSON6/JSOX Transcoder", parent );
+
+
+		const inputFrame1 = document.createElement( "div" );
+		inputFrame1.className = "from-group";
+		const input1 = document.createElement( "div" );
+		input1.className = "text-input"
+		input1.setAttribute( "contenteditable", true );
+		this.appendChild( inputFrame1 );
+		inputFrame1.appendChild( input1 );
+		input1.textContent = ".... Paste Content Herre....";
+
+		const inputFrame2 = document.createElement( "div" );
+		inputFrame2.className = "to-group";
+		const input2 = document.createElement( "div" );
+		input2.className = "text-input"
+		input2.setAttribute( "contenteditable", true );
+		this.appendChild( inputFrame2 );
+		inputFrame2.appendChild( input2 );
+
+
+		const controlBox = document.createElement( "div" );
+		this.appendChild( controlBox );
+
+		const frame = document.createElement( "div" );
+		frame.className = "from-group";
+		const title = document.createElement( "span" );
+		title.textContent = "From..."
+		frame.appendChild( title );
+		controlBox.appendChild( frame );
+
+
+		popups.makeRadioChoice( frame, this, "fromJSON", "JSON", "from", true );
+		popups.makeRadioChoice( frame, this, "fromJSON6", "JSON6", "from", true );
+		popups.makeRadioChoice( frame, this, "fromJSOX", "JSOX", "from", true );
+
+
+		const frameTo = document.createElement( "div" );
+		frameTo.className = "to-group";
+		const titleTo = document.createElement( "span" );
+		titleTo.textContent = "To..."
+		frameTo.appendChild( titleTo );
+		controlBox.appendChild( frameTo );
+
+		popups.makeRadioChoice( frameTo, this, "toJSON", "JSON", "to", true );
+		popups.makeRadioChoice( frameTo, this, "toJSON6", "JSON6", "to", true );
+		popups.makeRadioChoice( frameTo, this, "toJSOX", "JSOX", "to", true );
+
+		popups.makeTextInput( frameTo, this, "format", "Format" );
+		popups.makeButton( frameTo, "Convert", ()=>{
+			let f = null;
+			let t = null;
+			if( this.fromJSON ) f = JSON.parse.bind( JSON );
+			if( this.fromJSON6 ) f = JSON6.parse.bind( JSON6 );
+			if( this.fromJSOX ) f = JSOX.parse.bind( JSOX );
+			
+			if( this.toJSON ) t = JSON.stringify.bind( JSON );
+			if( this.toJSON6 ) t = JSON6.stringify.bind( JSON6 );
+			if( this.toJSOX ) t = JSOX.stringify.bind( JSOX );
+			try {
+				input2.textContent = t(f(input1.textContent ) );
+			} catch( err ) {
+				popups.Alert( err.toString() );
+			}
+		} );
+
+
+	}
+}
+
+new ConvertForm( document.body );
+
+</script>
+
+</html>
