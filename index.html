@@ -7,6 +7,7 @@
 .text-input{
 	width: 33vw;
 	height:60vh;
+white-space: pre;
 }
 
 .to-group,.from-group {
@@ -18,6 +19,9 @@
 .group-label {
 	position:relative;
 	top:-0.5em;
+}
+.alert-content {
+	font-size:3vh;
 }
 </style>
 </head>
@@ -56,6 +60,10 @@ class ConvertForm extends Popup{
 		inputFrame1.appendChild( input1 );
 		input1.textContent = ".... Paste Content Herre....";
 
+		input1.addEventListener( "focus", (event)=>{
+			  window.getSelection().selectAllChildren(event.target)
+		} );
+
 		const inputFrame2 = document.createElement( "div" );
 		inputFrame2.className = "to-group";
 		const input2 = document.createElement( "div" );
@@ -76,9 +84,9 @@ class ConvertForm extends Popup{
 		controlBox.appendChild( frame );
 
 
-		popups.makeRadioChoice( frame, this, "fromJSON", "JSON", "from", true );
-		popups.makeRadioChoice( frame, this, "fromJSON6", "JSON6", "from", true );
-		popups.makeRadioChoice( frame, this, "fromJSOX", "JSOX", "from", true );
+		const fr = popups.makeRadioChoice( frame, this, "fromJSON", "JSON", "from", true );
+		const fr6 = popups.makeRadioChoice( frame, this, "fromJSON6", "JSON6", "from", true );
+		const frx = popups.makeRadioChoice( frame, this, "fromJSOX", "JSOX", "from", true );
 
 
 		const frameTo = document.createElement( "div" );
@@ -88,23 +96,26 @@ class ConvertForm extends Popup{
 		frameTo.appendChild( titleTo );
 		controlBox.appendChild( frameTo );
 
-		popups.makeRadioChoice( frameTo, this, "toJSON", "JSON", "to", true );
-		popups.makeRadioChoice( frameTo, this, "toJSON6", "JSON6", "to", true );
-		popups.makeRadioChoice( frameTo, this, "toJSOX", "JSOX", "to", true );
+		const to = popups.makeRadioChoice( frameTo, this, "toJSON", "JSON", "to", true );
+		const to6 = popups.makeRadioChoice( frameTo, this, "toJSON6", "JSON6", "to", true );
+		const tox = popups.makeRadioChoice( frameTo, this, "toJSOX", "JSOX", "to", true );
 
-		popups.makeTextInput( frameTo, this, "format", "Format" );
-		popups.makeButton( frameTo, "Convert", ()=>{
+		popups.makeTextInput( controlBox, this, "format", "Format" );
+		popups.makeButton( controlBox, "Convert", ()=>{
 			let f = null;
 			let t = null;
-			if( this.fromJSON ) f = JSON.parse.bind( JSON );
-			if( this.fromJSON6 ) f = JSON6.parse.bind( JSON6 );
-			if( this.fromJSOX ) f = JSOX.parse.bind( JSOX );
+			if( fr.value ) f = JSON.parse.bind( JSON );
+			if( fr6.value ) f = JSON6.parse.bind( JSON6 );
+			if( frx.value ) f = JSOX.parse.bind( JSOX );
 			
-			if( this.toJSON ) t = JSON.stringify.bind( JSON );
-			if( this.toJSON6 ) t = JSON6.stringify.bind( JSON6 );
-			if( this.toJSOX ) t = JSOX.stringify.bind( JSOX );
+			if( to.value ) t = JSON.stringify.bind( JSON );
+			if( to6.value ) t = JSON6.stringify.bind( JSON6 );
+			if( tox.value ) t = JSOX.stringify.bind( JSOX );
 			try {
-				input2.textContent = t(f(input1.textContent ) );
+				let fmt = "\t";
+				if( this.format === "null" ) fmt = null;
+				else fmt = JSON.parse( '"'+this.format+'"' );
+				input2.textContent = t(f(input1.textContent ), null, fmt );
 			} catch( err ) {
 				popups.Alert( err.toString() );
 			}
